@@ -8,9 +8,19 @@ class cog1(commands.Cog, name="cog1"):
         self.bot = bot
 
     @commands.command(name="ping", aliases=[])
-    @commands.has_permissions(administrator=True)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.has_permissions()
     async def _ping(self, ctx: commands.Context):
-        ctx.send(f"Pong {round(self.bot.latency * 1000)}ms")
+        em = discord.Embed(
+            title=f'Pong! {round(self.bot.latency * 1000)}ms', color=0x00ff00)
+        await ctx.send(embed=em)
+
+    @_ping.error
+    async def _ping_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            embed = discord.Embed(title=f"Slow it down!",
+                                  description=f"Try again in {error.retry_after:.2f}s.", color=0xff0000)
+            await ctx.send(embed=embed)
 
 
 def setup(bot):
